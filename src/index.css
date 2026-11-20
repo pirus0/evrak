@@ -75,12 +75,12 @@ input[type='date'] { appearance: none; -webkit-appearance: none; text-align: lef
 /* Çerçeve */
 .kabuk {
   max-width: 448px; margin: 0 auto; min-height: 100svh;
-  padding: calc(env(safe-area-inset-top) + 12px) 12px calc(env(safe-area-inset-bottom) + 110px);
+  padding: calc(env(safe-area-inset-top) + 12px) 12px calc(env(safe-area-inset-bottom) + 170px);
 }
 .ust { display: flex; align-items: center; justify-content: space-between; padding: 0 8px 12px; }
 .ust h1 { display: flex; align-items: center; gap: 10px; font: 700 26px/1.2 var(--display); letter-spacing: -0.02em; }
 .ust h1 svg { color: var(--yesil); }
-.tema-dugme { display: flex; align-items: center; gap: 10px; min-height: 44px; font: inherit; letter-spacing: inherit; color: var(--ink); }
+.tema-dugme { min-height: 44px; cursor: default; -webkit-user-select: none; user-select: none; }
 .hap-grup { display: flex; gap: 2px; padding: 4px; border-radius: 999px; background: var(--surface); box-shadow: 0 1px 0 var(--line); }
 .ikon-dugme {
   width: 44px; height: 44px; border-radius: 999px; flex-shrink: 0;
@@ -88,27 +88,38 @@ input[type='date'] { appearance: none; -webkit-appearance: none; text-align: lef
 }
 .ikon-dugme:hover { background: var(--ink-5); }
 
-.sekmeler { display: flex; gap: 2px; padding: 4px; margin: 0 0 12px; border-radius: 999px; background: var(--surface); box-shadow: 0 1px 0 var(--line); }
-.sekmeler button {
-  flex: 1; min-height: 44px; border-radius: 999px; display: flex; align-items: center; justify-content: center; gap: 7px;
-  font-size: 15px; font-weight: 600; color: var(--ink-soft);
+/* Alt menü: yalnız ikon. Üstünde sağda artı, solunda Paylaş/Birleştir. */
+.sekmeler {
+  position: fixed; z-index: 5; left: 0; right: 0; bottom: 0;
+  display: flex; justify-content: center; gap: 8px;
+  padding: 6px 12px calc(env(safe-area-inset-bottom) + 6px);
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 -1px 0 var(--line);
 }
-.sekmeler button.secili { background: var(--ink); color: var(--paper); }
+.sekmeler button {
+  flex: 0 1 96px; height: 48px; border-radius: 999px;
+  display: flex; align-items: center; justify-content: center; color: var(--ink-faint);
+}
+.sekmeler button.secili { color: var(--ink); background: var(--ink-5); }
+.fab {
+  position: fixed; z-index: 6; right: max(16px, calc(50% - 224px + 16px));
+  bottom: calc(env(safe-area-inset-bottom) + 60px + 16px);
+  width: 56px; height: 56px; border-radius: 999px;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: var(--yesil); color: var(--on-yesil); box-shadow: 0 10px 24px -8px var(--yesil);
+}
 
 /* Kart ve liste */
 .kart { border-radius: 28px; background: var(--surface); box-shadow: var(--kart-golge); padding: 14px 8px 10px; }
 .kart + .kart { margin-top: 12px; }
+.kart-ust.ortali { justify-content: center; }
 .kart-ust { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 0 12px 10px; }
 .kart-ust h2 { font: 600 22px/1.15 var(--display); letter-spacing: -0.02em; }
 .kart-ust p { font-size: 13px; color: var(--ink-faint); margin-top: 2px; }
-.fab {
-  width: 48px; height: 48px; border-radius: 999px; flex-shrink: 0;
-  display: inline-flex; align-items: center; justify-content: center;
-  background: var(--yesil); color: var(--on-yesil); box-shadow: 0 8px 20px -8px var(--yesil);
-}
 
 .ay-secici { display: flex; align-items: center; gap: 4px; }
-.ay-secici strong { font: 600 22px/1.15 var(--display); letter-spacing: -0.02em; min-width: 0; flex: 1; text-align: center; }
+.ay-secici strong { font: 600 22px/1.15 var(--display); letter-spacing: -0.02em; min-width: 150px; text-align: center; }
 
 .ozet { display: flex; align-items: center; justify-content: space-between; padding: 0 6px 4px 4px; font-size: 13px; color: var(--ink-faint); }
 .ozet b { color: var(--ink); font-weight: 600; }
@@ -166,9 +177,9 @@ input[type='date'] { appearance: none; -webkit-appearance: none; text-align: lef
 .yazi-tehlike { color: var(--kirmizi) !important; }
 
 .alt-cubuk {
-  position: fixed; z-index: 4; left: 50%; transform: translateX(-50%);
-  bottom: calc(env(safe-area-inset-bottom) + 16px);
-  width: min(424px, calc(100% - 24px));
+  position: fixed; z-index: 4; left: max(16px, calc(50% - 224px + 16px));
+  right: calc(max(16px, calc(50% - 224px + 16px)) + 56px + 10px);
+  bottom: calc(env(safe-area-inset-bottom) + 60px + 16px);
   display: flex; gap: 8px; padding: 6px; border-radius: 999px;
   background: var(--surface); box-shadow: 0 1px 0 var(--line), 0 8px 24px -10px rgba(0, 0, 0, 0.35);
 }

@@ -50,7 +50,6 @@ export default function Garantiler() {
             <h2>Süren</h2>
             {suren.length > 0 && <p>{suren.length} belge</p>}
           </div>
-          <button className="fab" onClick={() => setForm('yeni')} aria-label="Ekle"><IArti /></button>
         </div>
         {hata && <p className="hata">{hata}</p>}
         {liste && suren.length === 0 && <Bos ikon={<IGaranti boyut={28} />}>Garanti belgesi yok</Bos>}
@@ -62,6 +61,7 @@ export default function Garantiler() {
           {eski && <ul className="liste soluk-liste">{[...biten].reverse().map(satir)}</ul>}
         </div>
       )}
+      <button className="fab" onClick={() => setForm('yeni')} aria-label="Ekle"><IArti /></button>
       {form && <GarantiForm g={form === 'yeni' ? null : form} kapat={() => setForm(null)} />}
     </section>
   )

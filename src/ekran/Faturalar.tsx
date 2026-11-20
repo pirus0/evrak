@@ -72,13 +72,12 @@ export default function Faturalar() {
   return (
     <section>
       <div className="kart">
-        <div className="kart-ust">
+        <div className="kart-ust ortali">
           <div className="ay-secici">
             <button className="ikon-dugme" onClick={() => ayDegis(-1)} aria-label="Önceki ay"><ISol /></button>
             <strong>{ayAdi(ay)}</strong>
             <button className="ikon-dugme" onClick={() => ayDegis(1)} aria-label="Sonraki ay"><ISag /></button>
           </div>
-          <button className="fab" onClick={() => sec.current?.click()} aria-label="Ekle"><IArti /></button>
         </div>
 
         {hata && <p className="hata">{hata}</p>}
@@ -136,6 +135,8 @@ export default function Faturalar() {
           )}
         </div>
       )}
+
+      <button className="fab" onClick={() => sec.current?.click()} aria-label="Ekle"><IArti /></button>
 
       {yeni && <YeniFatura dosyalar={yeni} ay={ay} kapat={() => setYeni(null)} />}
       {duzenle && <FaturaDuzenle f={duzenle} kapat={() => setDuzenle(null)} />}

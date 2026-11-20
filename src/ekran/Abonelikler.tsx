@@ -26,7 +26,6 @@ export default function Abonelikler() {
             <h2>Yenilemeler</h2>
             {sirali.length > 0 && <p>{sirali.length} abonelik</p>}
           </div>
-          <button className="fab" onClick={() => setForm('yeni')} aria-label="Ekle"><IArti /></button>
         </div>
         {hata && <p className="hata">{hata}</p>}
         {liste && liste.length === 0 && <Bos ikon={<IAbonelik boyut={28} />}>Abonelik yok</Bos>}
@@ -55,6 +54,7 @@ export default function Abonelikler() {
           </>
         )}
       </div>
+      <button className="fab" onClick={() => setForm('yeni')} aria-label="Ekle"><IArti /></button>
       {form && <AbonelikForm a={form === 'yeni' ? null : form} kapat={() => setForm(null)} />}
     </section>
   )

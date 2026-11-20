@@ -1,16 +1,16 @@
 import { onAuthStateChanged, type User } from 'firebase/auth'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Abonelikler from './ekran/Abonelikler'
 import Faturalar from './ekran/Faturalar'
 import Garantiler from './ekran/Garantiler'
 import { auth } from './firebase'
 import Giris from './Giris'
-import { IFatura } from './ikon'
+import { IAbonelik, IFatura, IGaranti } from './ikon'
 
 const SEKMELER = [
-  { id: 'fatura', ad: 'Fatura' },
-  { id: 'garanti', ad: 'Garanti' },
-  { id: 'abonelik', ad: 'Abonelik' },
+  { id: 'fatura', ad: 'Fatura', ikon: IFatura },
+  { id: 'garanti', ad: 'Garanti', ikon: IGaranti },
+  { id: 'abonelik', ad: 'Abonelik', ikon: IAbonelik },
 ] as const
 type Sekme = (typeof SEKMELER)[number]['id']
 
@@ -22,7 +22,7 @@ function ilkSekme(): Sekme {
   return 'fatura'
 }
 
-// Başlığa dokununca gündüz/gece değişir. Seçim Evrak'a özel saklanır; seçim yoksa Eyes On'unki, o da yoksa telefonunki geçer.
+// Başlığa çift dokununca gündüz/gece değişir (Eyes On'daki gibi). Seçim Evrak'a özel saklanır; seçim yoksa Eyes On'unki, o da yoksa telefonunki geçer.
 function temaDegistir() {
   const yeni = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'
   document.documentElement.dataset.theme = yeni
@@ -33,6 +33,7 @@ function temaDegistir() {
 export default function App() {
   const [kullanici, setKullanici] = useState<User | null | undefined>(undefined)
   const [sekme, setSekme] = useState<Sekme>(ilkSekme)
+  const sonDokunus = useRef(0)
   useEffect(() => onAuthStateChanged(auth, setKullanici), [])
   useEffect(() => {
     try { localStorage.setItem('evrak-sekme', sekme) } catch { /* gizli mod */ }
@@ -44,18 +45,31 @@ export default function App() {
   return (
     <div className="kabuk">
       <header className="ust">
-        <h1><button className="tema-dugme" onClick={temaDegistir} aria-label="Gündüz ya da gece"><IFatura boyut={26} />Evrak</button></h1>
+        <h1
+          className="tema-dugme"
+          onClick={() => {
+            const simdi = Date.now()
+            if (simdi - sonDokunus.current < 350) {
+              sonDokunus.current = 0
+              temaDegistir()
+            } else sonDokunus.current = simdi
+          }}
+        >
+          <IFatura boyut={26} />Evrak
+        </h1>
       </header>
-      <nav className="sekmeler">
-        {SEKMELER.map(({ id, ad }) => (
-          <button key={id} className={sekme === id ? 'secili' : ''} onClick={() => setSekme(id)}>{ad}</button>
-        ))}
-      </nav>
       <main>
         {sekme === 'fatura' && <Faturalar />}
         {sekme === 'garanti' && <Garantiler />}
         {sekme === 'abonelik' && <Abonelikler />}
       </main>
+      <nav className="sekmeler">
+        {SEKMELER.map(({ id, ad, ikon: I }) => (
+          <button key={id} className={sekme === id ? 'secili' : ''} onClick={() => setSekme(id)} aria-label={ad} aria-current={sekme === id ? 'page' : undefined}>
+            <I boyut={24} />
+          </button>
+        ))}
+      </nav>
     </div>
   )
 }
