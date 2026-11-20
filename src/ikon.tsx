@@ -9,7 +9,7 @@ export const IArti = () => (<T><path d="M12 5v14M5 12h14" /></T>)
 export const ISol = () => (<T><path d="M15 6l-6 6 6 6" /></T>)
 export const ISag = () => (<T><path d="M9 6l6 6-6 6" /></T>)
 export const IKapat = () => (<T boyut={20}><path d="M6 6l12 12M18 6L6 18" /></T>)
-export const ICikis = () => (<T boyut={20}><path d="M14 4h4a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-4" /><path d="M10 8l-4 4 4 4M6 12h9" /></T>)
+
 export const IBelge = () => (<T boyut={18}><path d="M7 3h7l4 4v14H7z" /><path d="M14 3v4h4" /></T>)
 export const IFoto = () => (<T boyut={18}><rect x="3" y="5" width="18" height="14" rx="2" /><circle cx="9" cy="10" r="1.6" /><path d="M21 16l-5-5-8 8" /></T>)
 export const ITik = ({ acik }: { acik: boolean }) => (

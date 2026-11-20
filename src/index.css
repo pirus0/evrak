@@ -80,6 +80,7 @@ input[type='date'] { appearance: none; -webkit-appearance: none; text-align: lef
 .ust { display: flex; align-items: center; justify-content: space-between; padding: 0 8px 12px; }
 .ust h1 { display: flex; align-items: center; gap: 10px; font: 700 26px/1.2 var(--display); letter-spacing: -0.02em; }
 .ust h1 svg { color: var(--yesil); }
+.tema-dugme { display: flex; align-items: center; gap: 10px; min-height: 44px; font: inherit; letter-spacing: inherit; color: var(--ink); }
 .hap-grup { display: flex; gap: 2px; padding: 4px; border-radius: 999px; background: var(--surface); box-shadow: 0 1px 0 var(--line); }
 .ikon-dugme {
   width: 44px; height: 44px; border-radius: 999px; flex-shrink: 0;

@@ -14,8 +14,10 @@
     <script>
       // Eyes On ile aynı adres (pirus0.github.io): onun tema seçimi burada da geçerli.
       try {
-        var t = localStorage.getItem('eyeson-theme');
-        document.documentElement.dataset.theme = t === 'light' || t === 'dark' ? t : matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        var t = localStorage.getItem('evrak-theme') || localStorage.getItem('eyeson-theme');
+        var d = t === 'light' || t === 'dark' ? t : matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        document.documentElement.dataset.theme = d;
+        document.querySelectorAll('meta[name="theme-color"]').forEach(function (m) { m.setAttribute('content', d === 'dark' ? '#11100e' : '#efebe2'); });
       } catch (e) {}
     </script>
   </head>

@@ -1,11 +1,11 @@
-import { onAuthStateChanged, signOut, type User } from 'firebase/auth'
+import { onAuthStateChanged, type User } from 'firebase/auth'
 import { useEffect, useState } from 'react'
 import Abonelikler from './ekran/Abonelikler'
 import Faturalar from './ekran/Faturalar'
 import Garantiler from './ekran/Garantiler'
 import { auth } from './firebase'
 import Giris from './Giris'
-import { ICikis, IFatura } from './ikon'
+import { IFatura } from './ikon'
 
 const SEKMELER = [
   { id: 'fatura', ad: 'Fatura' },
@@ -22,6 +22,14 @@ function ilkSekme(): Sekme {
   return 'fatura'
 }
 
+// Başlığa dokununca gündüz/gece değişir. Seçim Evrak'a özel saklanır; seçim yoksa Eyes On'unki, o da yoksa telefonunki geçer.
+function temaDegistir() {
+  const yeni = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'
+  document.documentElement.dataset.theme = yeni
+  document.querySelectorAll('meta[name="theme-color"]').forEach((m) => m.setAttribute('content', yeni === 'dark' ? '#11100e' : '#efebe2'))
+  try { localStorage.setItem('evrak-theme', yeni) } catch { /* gizli mod */ }
+}
+
 export default function App() {
   const [kullanici, setKullanici] = useState<User | null | undefined>(undefined)
   const [sekme, setSekme] = useState<Sekme>(ilkSekme)
@@ -36,10 +44,7 @@ export default function App() {
   return (
     <div className="kabuk">
       <header className="ust">
-        <h1><IFatura boyut={26} />Evrak</h1>
-        <div className="hap-grup">
-          <button className="ikon-dugme" onClick={() => signOut(auth)} aria-label="Çıkış"><ICikis /></button>
-        </div>
+        <h1><button className="tema-dugme" onClick={temaDegistir} aria-label="Gündüz ya da gece"><IFatura boyut={26} />Evrak</button></h1>
       </header>
       <nav className="sekmeler">
         {SEKMELER.map(({ id, ad }) => (
