@@ -1,7 +1,7 @@
 import { addDoc, deleteDoc, doc, updateDoc, writeBatch } from 'firebase/firestore'
 import { useMemo, useRef, useState } from 'react'
 import { db, kGaranti } from '../firebase'
-import { IArti, IBelge, IFoto } from '../ikon'
+import { IArti, IBelge, IFoto, IGaranti } from '../ikon'
 import { dosyaKaydet, dosyaSilBatch, pdfMi } from '../lib/dosya'
 import { garantiBitis } from '../lib/hesap'
 import { bugun, gunFarki, uzun } from '../lib/tarih'
@@ -35,7 +35,7 @@ export default function Garantiler() {
     return (
       <li key={g.id}>
         <button className="satir" onClick={() => setForm(g)}>
-          <span className="ad">{g.ad}</span>
+          <span className="ad"><span className="baslik">{g.ad}</span></span>
           <span className="yan"><b className={k.sinif}>{k.metin}</b><small>{uzun(bitis)}</small></span>
         </button>
       </li>
@@ -44,18 +44,24 @@ export default function Garantiler() {
 
   return (
     <section>
-      {hata && <p className="hata">{hata}</p>}
-      {liste && liste.length === 0 && <Bos>Garanti belgesi yok</Bos>}
-      {suren.length > 0 && <ul className="liste">{suren.map(satir)}</ul>}
+      <div className="kart">
+        <div className="kart-ust">
+          <div>
+            <h2>Süren</h2>
+            {suren.length > 0 && <p>{suren.length} belge</p>}
+          </div>
+          <button className="fab" onClick={() => setForm('yeni')} aria-label="Ekle"><IArti /></button>
+        </div>
+        {hata && <p className="hata">{hata}</p>}
+        {liste && suren.length === 0 && <Bos ikon={<IGaranti boyut={28} />}>Garanti belgesi yok</Bos>}
+        {suren.length > 0 && <ul className="liste">{suren.map(satir)}</ul>}
+      </div>
       {biten.length > 0 && (
-        <>
+        <div className="kart">
           <button className="bolum-dugme" onClick={() => setEski(!eski)}>Bitenler {biten.length}</button>
           {eski && <ul className="liste soluk-liste">{[...biten].reverse().map(satir)}</ul>}
-        </>
+        </div>
       )}
-      <div className="alt-cubuk">
-        <button className="dugme kare" onClick={() => setForm('yeni')} aria-label="Ekle"><IArti /></button>
-      </div>
       {form && <GarantiForm g={form === 'yeni' ? null : form} kapat={() => setForm(null)} />}
     </section>
   )
@@ -125,8 +131,8 @@ function GarantiForm({ g, kapat }: { g: Garanti | null; kapat: () => void }) {
             <span className="dosya-ad">{pdfMi(yeniDosya) ? <IBelge /> : <IFoto />} {yeniDosya.name}</span>
           ) : mevcut ? (
             <>
-              <button className="dugme ince" onClick={() => setGoster(true)}>Görüntüle</button>
-              <button className="dugme ince ikincil yazi-tehlike" onClick={() => setDosyaSil(true)}>Kaldır</button>
+              <button className="dugme ince ikincil" onClick={() => setGoster(true)}>Görüntüle</button>
+              <button className="dugme ince sade yazi-tehlike" onClick={() => setDosyaSil(true)}>Kaldır</button>
             </>
           ) : null}
           <button className="dugme ince ikincil" onClick={() => sec.current?.click()}>{mevcut || yeniDosya ? 'Değiştir' : 'Ekle'}</button>
@@ -142,12 +148,12 @@ function GarantiForm({ g, kapat }: { g: Garanti | null; kapat: () => void }) {
       <div className="pencere-alt">
         {silOnay ? (
           <>
-            <button className="dugme ikincil" onClick={() => setSilOnay(false)}>Vazgeç</button>
+            <button className="dugme sade" onClick={() => setSilOnay(false)}>Vazgeç</button>
             <button className="dugme tehlike" onClick={sil}>Kalıcı sil</button>
           </>
         ) : (
           <>
-            {g && <button className="dugme ikincil yazi-tehlike" onClick={() => setSilOnay(true)}>Sil</button>}
+            {g && <button className="dugme sade yazi-tehlike" onClick={() => setSilOnay(true)}>Sil</button>}
             <button className="dugme" disabled={!gecerli || is} onClick={kaydet}>{is ? 'Kaydediliyor' : 'Kaydet'}</button>
           </>
         )}

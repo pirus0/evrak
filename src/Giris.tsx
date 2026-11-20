@@ -1,6 +1,7 @@
 import { signInWithEmailAndPassword } from 'firebase/auth'
 import { useState } from 'react'
 import { auth, HESAP } from './firebase'
+import { IFatura } from './ikon'
 
 export default function Giris() {
   const [sifre, setSifre] = useState('')
@@ -21,10 +22,10 @@ export default function Giris() {
   }
   return (
     <form className="giris" onSubmit={gir}>
-      <h1>Evrak</h1>
+      <IFatura boyut={48} />
       <input type="password" autoComplete="current-password" placeholder="Şifre" value={sifre} onChange={(e) => setSifre(e.target.value)} autoFocus />
       <button className="dugme" disabled={bekle || !sifre}>Giriş</button>
-      {hata && <p className="hata">{hata}</p>}
+      <p className="hata" role="alert">{hata}</p>
     </form>
   )
 }

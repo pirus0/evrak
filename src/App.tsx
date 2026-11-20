@@ -5,12 +5,12 @@ import Faturalar from './ekran/Faturalar'
 import Garantiler from './ekran/Garantiler'
 import { auth } from './firebase'
 import Giris from './Giris'
-import { IAbonelik, IFatura, IGaranti } from './ikon'
+import { ICikis, IFatura } from './ikon'
 
 const SEKMELER = [
-  { id: 'fatura', ad: 'Fatura', ikon: IFatura },
-  { id: 'garanti', ad: 'Garanti', ikon: IGaranti },
-  { id: 'abonelik', ad: 'Abonelik', ikon: IAbonelik },
+  { id: 'fatura', ad: 'Fatura' },
+  { id: 'garanti', ad: 'Garanti' },
+  { id: 'abonelik', ad: 'Abonelik' },
 ] as const
 type Sekme = (typeof SEKMELER)[number]['id']
 
@@ -33,26 +33,24 @@ export default function App() {
   if (kullanici === undefined) return null
   if (!kullanici) return <Giris />
 
-  const baslik = SEKMELER.find((s) => s.id === sekme)!.ad
   return (
     <div className="kabuk">
       <header className="ust">
-        <h1>{baslik}</h1>
-        <button className="metin-dugme" onClick={() => signOut(auth)}>Çıkış</button>
+        <h1><IFatura boyut={26} />Evrak</h1>
+        <div className="hap-grup">
+          <button className="ikon-dugme" onClick={() => signOut(auth)} aria-label="Çıkış"><ICikis /></button>
+        </div>
       </header>
+      <nav className="sekmeler">
+        {SEKMELER.map(({ id, ad }) => (
+          <button key={id} className={sekme === id ? 'secili' : ''} onClick={() => setSekme(id)}>{ad}</button>
+        ))}
+      </nav>
       <main>
         {sekme === 'fatura' && <Faturalar />}
         {sekme === 'garanti' && <Garantiler />}
         {sekme === 'abonelik' && <Abonelikler />}
       </main>
-      <nav className="sekmeler">
-        {SEKMELER.map(({ id, ad, ikon: I }) => (
-          <button key={id} className={sekme === id ? 'secili' : ''} onClick={() => setSekme(id)}>
-            <I />
-            <span>{ad}</span>
-          </button>
-        ))}
-      </nav>
     </div>
   )
 }

@@ -6,4 +6,4 @@ export function sayiOku(s: string): number | null {
   const n = t.includes(',') ? Number(t.replace(/\./g, '').replace(',', '.')) : Number(t)
   return Number.isFinite(n) && n >= 0 ? n : null
 }
-export const sayiYaz = (n: number | null) => (n == null ? '' : n.toLocaleString('tr-TR', { maximumFractionDigits: 2 }))
+export const sayiYaz = (n: number | null) => (n == null ? '' : n.toLocaleString('tr-TR', { minimumFractionDigits: Number.isInteger(n) ? 0 : 2, maximumFractionDigits: 2 }))

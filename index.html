@@ -6,11 +6,18 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-title" content="Evrak" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-    <meta name="theme-color" content="#f5f4f1" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#151514" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#efebe2" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#11100e" media="(prefers-color-scheme: dark)" />
     <link rel="apple-touch-icon" href="/evrak/apple-touch-icon.png" />
     <link rel="icon" href="/evrak/icon-192.png" />
     <title>Evrak</title>
+    <script>
+      // Eyes On ile aynı adres (pirus0.github.io): onun tema seçimi burada da geçerli.
+      try {
+        var t = localStorage.getItem('eyeson-theme');
+        document.documentElement.dataset.theme = t === 'light' || t === 'dark' ? t : matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      } catch (e) {}
+    </script>
   </head>
   <body>
     <div id="root"></div>

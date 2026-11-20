@@ -16,6 +16,7 @@ export function Pencere({ baslik, kapat, children }: { baslik: string; kapat: ()
   return (
     <div className="perde" onClick={kapat}>
       <div className="pencere" role="dialog" aria-label={baslik} onClick={(e) => e.stopPropagation()}>
+        <div className="tutamak" />
         <div className="pencere-ust">
           <h2>{baslik}</h2>
           <button className="ikon-dugme" onClick={kapat} aria-label="Kapat"><IKapat /></button>
@@ -74,6 +75,6 @@ export function Goruntule({ dosya, ad, kapat }: { dosya: DosyaBilgi; ad: string;
   )
 }
 
-export function Bos({ children }: { children: ReactNode }) {
-  return <p className="bos">{children}</p>
+export function Bos({ ikon, children }: { ikon?: ReactNode; children: ReactNode }) {
+  return <div className="bos">{ikon}<p>{children}</p></div>
 }

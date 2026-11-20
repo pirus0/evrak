@@ -14,15 +14,15 @@ export default defineConfig({
         short_name: 'Evrak',
         lang: 'tr',
         display: 'standalone',
-        background_color: '#f5f4f1',
-        theme_color: '#f5f4f1',
+        background_color: '#efebe2',
+        theme_color: '#efebe2',
         icons: [
           { src: 'icon-192.png', sizes: '192x192', type: 'image/png' },
           { src: 'icon-512.png', sizes: '512x512', type: 'image/png' },
           { src: 'icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
         ],
       },
-      workbox: { globPatterns: ['**/*.{js,css,html,png,svg}'], maximumFileSizeToCacheInBytes: 4 * 1024 * 1024 },
+      workbox: { globPatterns: ['**/*.{js,css,html,png,svg,woff2}'], maximumFileSizeToCacheInBytes: 4 * 1024 * 1024 },
     }),
   ],
 })

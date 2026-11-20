@@ -1,7 +1,7 @@
 import { addDoc, deleteDoc, doc, updateDoc, writeBatch } from 'firebase/firestore'
 import { useMemo, useRef, useState } from 'react'
 import { db, kFatura } from '../firebase'
-import { IArti, IBelge, IFoto, ISag, ISol, ITik } from '../ikon'
+import { IArti, IBelge, IFatura, IFoto, ISag, ISol, ITik } from '../ikon'
 import { birlestir, dosyaAdi, dosyaKaydet, dosyaOku, dosyaSilBatch, fileYap, paylas, pdfMi } from '../lib/dosya'
 import { sayiOku, sayiYaz, tl } from '../lib/para'
 import { ayAdi, ayAnahtar, ayKaydir, bugun, kisa } from '../lib/tarih'
@@ -71,34 +71,45 @@ export default function Faturalar() {
 
   return (
     <section>
-      <div className="ay-secici">
-        <button className="ikon-dugme" onClick={() => ayDegis(-1)} aria-label="Önceki ay"><ISol /></button>
-        <strong>{ayAdi(ay)}</strong>
-        <button className="ikon-dugme" onClick={() => ayDegis(1)} aria-label="Sonraki ay"><ISag /></button>
+      <div className="kart">
+        <div className="kart-ust">
+          <div className="ay-secici">
+            <button className="ikon-dugme" onClick={() => ayDegis(-1)} aria-label="Önceki ay"><ISol /></button>
+            <strong>{ayAdi(ay)}</strong>
+            <button className="ikon-dugme" onClick={() => ayDegis(1)} aria-label="Sonraki ay"><ISag /></button>
+          </div>
+          <button className="fab" onClick={() => sec.current?.click()} aria-label="Ekle"><IArti /></button>
+        </div>
+
+        {hata && <p className="hata">{hata}</p>}
+        {liste && aydakiler.length === 0 && <Bos ikon={<IFatura boyut={28} />}>Bu ay fatura yok</Bos>}
+
+        {aydakiler.length > 0 && (
+          <>
+            <div className="ozet">
+              <button className="tik-dugme" onClick={tumuDegis}><ITik acik={tumu} /> Tümü</button>
+              <span className="tabular">{secili.length} / {aydakiler.length}{toplam > 0 && <> · <b>{tl(toplam)}</b></>}</span>
+            </div>
+            <ul className="liste">
+              {aydakiler.map((f) => (
+                <li key={f.id} className={haric.has(f.id) ? 'kapali' : ''}>
+                  <button className="tik-dugme" onClick={() => degistir(f.id)} aria-label="Seç"><ITik acik={!haric.has(f.id)} /></button>
+                  <button className="satir" onClick={() => setDuzenle(f)}>
+                    <span className="tur">{f.dosya.mime === 'application/pdf' ? <IBelge /> : <IFoto />}</span>
+                    <span className="ad"><span className="baslik">{f.ad}</span></span>
+                    <span className="yan">{f.tutar != null && <b>{tl(f.tutar)}</b>}<small>{kisa(f.tarih)}</small></span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </>
+        )}
       </div>
 
-      {hata && <p className="hata">{hata}</p>}
-      {liste && aydakiler.length === 0 && <Bos>Bu ay fatura yok</Bos>}
-
-      {aydakiler.length > 0 && (
-        <>
-          <div className="ozet">
-            <button className="tik-dugme" onClick={tumuDegis}><ITik acik={tumu} /> Tümü</button>
-            <span>{secili.length} / {aydakiler.length}{toplam > 0 && ` · ${tl(toplam)}`}</span>
-          </div>
-          <ul className="liste">
-            {aydakiler.map((f) => (
-              <li key={f.id} className={haric.has(f.id) ? 'kapali' : ''}>
-                <button className="tik-dugme" onClick={() => degistir(f.id)} aria-label="Seç"><ITik acik={!haric.has(f.id)} /></button>
-                <button className="satir" onClick={() => setDuzenle(f)}>
-                  <span className="tur">{f.dosya.mime === 'application/pdf' ? <IBelge /> : <IFoto />}</span>
-                  <span className="ad">{f.ad}</span>
-                  <span className="yan">{f.tutar != null && <b>{tl(f.tutar)}</b>}<small>{kisa(f.tarih)}</small></span>
-                </button>
-              </li>
-            ))}
-          </ul>
-        </>
+      {(is || isHata || hazir) && (
+        <p className={isHata ? 'durum hata' : 'durum'}>
+          {isHata ?? is ?? (hazir!.tur === 'birlestir' ? `${secili.length} fatura tek PDF` : `${hazir!.dosyalar.length} dosya`)}
+        </p>
       )}
 
       <input ref={sec} type="file" accept="image/*,application/pdf" multiple hidden
@@ -108,26 +119,22 @@ export default function Faturalar() {
           if (f.length) setYeni(f)
         }} />
 
-      <div className="alt-cubuk">
-        {hazir ? (
-          <>
-            <button className="dugme ikincil" onClick={() => setHazir(null)}>Vazgeç</button>
-            <button className="dugme" onClick={() => paylas(hazir.dosyalar).then(() => setHazir(null)).catch((e) => setIsHata(e.message))}>
-              Gönder
-            </button>
-          </>
-        ) : (
-          <>
-            <button className="dugme ikincil" disabled={!secili.length || !!is} onClick={() => hazirla('paylas')}>Paylaş</button>
-            <button className="dugme ikincil" disabled={!secili.length || !!is} onClick={() => hazirla('birlestir')}>Birleştir</button>
-            <button className="dugme kare" onClick={() => sec.current?.click()} aria-label="Ekle"><IArti /></button>
-          </>
-        )}
-      </div>
-      {(is || isHata || hazir) && (
-        <p className={isHata ? 'durum hata' : 'durum'}>
-          {isHata ?? is ?? (hazir!.tur === 'birlestir' ? `${secili.length} fatura tek PDF` : `${hazir!.dosyalar.length} dosya`)}
-        </p>
+      {aydakiler.length > 0 && (
+        <div className="alt-cubuk">
+          {hazir ? (
+            <>
+              <button className="dugme sade" onClick={() => setHazir(null)}>Vazgeç</button>
+              <button className="dugme" onClick={() => paylas(hazir.dosyalar).then(() => setHazir(null)).catch((e) => setIsHata(e.message))}>
+                Gönder
+              </button>
+            </>
+          ) : (
+            <>
+              <button className="dugme ikincil" disabled={!secili.length || !!is} onClick={() => hazirla('paylas')}>Paylaş</button>
+              <button className="dugme" disabled={!secili.length || !!is} onClick={() => hazirla('birlestir')}>Birleştir</button>
+            </>
+          )}
+        </div>
       )}
 
       {yeni && <YeniFatura dosyalar={yeni} ay={ay} kapat={() => setYeni(null)} />}
@@ -204,12 +211,12 @@ function FaturaDuzenle({ f, kapat }: { f: Fatura; kapat: () => void }) {
       <div className="pencere-alt">
         {silOnay ? (
           <>
-            <button className="dugme ikincil" onClick={() => setSilOnay(false)}>Vazgeç</button>
+            <button className="dugme sade" onClick={() => setSilOnay(false)}>Vazgeç</button>
             <button className="dugme tehlike" onClick={sil}>Kalıcı sil</button>
           </>
         ) : (
           <>
-            <button className="dugme ikincil yazi-tehlike" onClick={() => setSilOnay(true)}>Sil</button>
+            <button className="dugme sade yazi-tehlike" onClick={() => setSilOnay(true)}>Sil</button>
             <button className="dugme ikincil" onClick={() => setGoster(true)}>Görüntüle</button>
             <button className="dugme" disabled={!tarih} onClick={kaydet}>Kaydet</button>
           </>
