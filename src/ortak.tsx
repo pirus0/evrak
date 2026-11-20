@@ -1,9 +1,14 @@
 import { useEffect, useState, type ReactNode } from 'react'
+import { createPortal } from 'react-dom'
 import { IKapat } from './ikon'
 import { dosyaOku, fileYap, paylas } from './lib/dosya'
+import { useKapanis } from './lib/hareket'
 import type { DosyaBilgi } from './tipler'
 
-export function Pencere({ baslik, kapat, children }: { baslik: string; kapat: () => void; children: ReactNode }) {
+// Sabit konumlu öğeler body'ye taşınır: sekme/ay geçişinde kayan içerik (transform) onları sürüklemesin.
+export const Sabit = ({ children }: { children: ReactNode }) => createPortal(children, document.body)
+
+export function Pencere({ baslik, kapat, cikiyor, children }: { baslik: string; kapat: () => void; cikiyor?: boolean; children: ReactNode }) {
   useEffect(() => {
     const k = (e: KeyboardEvent) => e.key === 'Escape' && kapat()
     window.addEventListener('keydown', k)
@@ -13,8 +18,8 @@ export function Pencere({ baslik, kapat, children }: { baslik: string; kapat: ()
       document.body.style.overflow = ''
     }
   }, [kapat])
-  return (
-    <div className="perde" onClick={kapat}>
+  return createPortal(
+    <div className={cikiyor ? 'perde cik' : 'perde'} onClick={kapat}>
       <div className="pencere" role="dialog" aria-label={baslik} onClick={(e) => e.stopPropagation()}>
         <div className="tutamak" />
         <div className="pencere-ust">
@@ -23,7 +28,8 @@ export function Pencere({ baslik, kapat, children }: { baslik: string; kapat: ()
         </div>
         {children}
       </div>
-    </div>
+    </div>,
+    document.body,
   )
 }
 
@@ -37,7 +43,8 @@ export function Alan({ etiket, children }: { etiket: string; children: ReactNode
 }
 
 // Belgeyi uygulamanın içinde gösterir; PDF'i telefonun kendi görüntüleyicisi açar.
-export function Goruntule({ dosya, ad, kapat }: { dosya: DosyaBilgi; ad: string; kapat: () => void }) {
+export function Goruntule({ dosya, ad, kapat: kapatDis }: { dosya: DosyaBilgi; ad: string; kapat: () => void }) {
+  const { cikiyor, kapan: kapat } = useKapanis(kapatDis, 180)
   const [url, setUrl] = useState<string | null>(null)
   const [file, setFile] = useState<File | null>(null)
   const [hata, setHata] = useState<string | null>(null)
@@ -55,8 +62,8 @@ export function Goruntule({ dosya, ad, kapat }: { dosya: DosyaBilgi; ad: string;
       if (u) URL.revokeObjectURL(u)
     }
   }, [dosya, ad])
-  return (
-    <div className="gosterici">
+  return createPortal(
+    <div className={cikiyor ? 'gosterici cik' : 'gosterici'}>
       <div className="gosterici-ust">
         <span>{ad}</span>
         <div className="sira">
@@ -71,7 +78,8 @@ export function Goruntule({ dosya, ad, kapat }: { dosya: DosyaBilgi; ad: string;
         {url && dosya.mime !== 'application/pdf' && <img src={url} alt={ad} />}
         {url && dosya.mime === 'application/pdf' && <iframe src={url} title={ad} />}
       </div>
-    </div>
+    </div>,
+    document.body,
   )
 }
 

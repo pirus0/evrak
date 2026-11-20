@@ -6,7 +6,8 @@ import { birlestir, dosyaAdi, dosyaKaydet, dosyaOku, dosyaSilBatch, fileYap, pay
 import { sayiOku, sayiYaz, tl } from '../lib/para'
 import { ayAdi, ayAnahtar, ayKaydir, bugun, kisa } from '../lib/tarih'
 import { useFaturalar } from '../lib/veri'
-import { Alan, Bos, Goruntule, Pencere } from '../ortak'
+import { Alan, Bos, Goruntule, Pencere, Sabit } from '../ortak'
+import { useKapanis } from '../lib/hareket'
 import type { Fatura } from '../tipler'
 
 type Hazir = { tur: 'paylas' | 'birlestir'; dosyalar: File[] }
@@ -14,6 +15,7 @@ type Hazir = { tur: 'paylas' | 'birlestir'; dosyalar: File[] }
 export default function Faturalar() {
   const { liste, hata } = useFaturalar()
   const [ay, setAy] = useState(ayAnahtar(bugun()))
+  const [yon, setYon] = useState(0)
   const [haric, setHaric] = useState<Set<string>>(new Set())
   const [yeni, setYeni] = useState<File[] | null>(null)
   const [duzenle, setDuzenle] = useState<Fatura | null>(null)
@@ -30,6 +32,7 @@ export default function Faturalar() {
   const toplam = secili.reduce((t, f) => t + (f.tutar ?? 0), 0)
 
   function ayDegis(n: number) {
+    setYon(n)
     setAy((a) => ayKaydir(a, n))
     setHaric(new Set())
     setHazir(null)
@@ -80,6 +83,7 @@ export default function Faturalar() {
           </div>
         </div>
 
+        <div key={ay} className={yon > 0 ? 'gecis-sag' : yon < 0 ? 'gecis-sol' : ''}>
         {hata && <p className="hata">{hata}</p>}
         {liste && aydakiler.length === 0 && <Bos ikon={<IFatura boyut={28} />}>Bu ay fatura yok</Bos>}
 
@@ -103,10 +107,11 @@ export default function Faturalar() {
             </ul>
           </>
         )}
+        </div>
       </div>
 
       {(is || isHata || hazir) && (
-        <p className={isHata ? 'durum hata' : 'durum'}>
+        <p className={isHata ? 'durum hata belir' : 'durum belir'}>
           {isHata ?? is ?? (hazir!.tur === 'birlestir' ? `${secili.length} fatura tek PDF` : `${hazir!.dosyalar.length} dosya`)}
         </p>
       )}
@@ -119,24 +124,24 @@ export default function Faturalar() {
         }} />
 
       {aydakiler.length > 0 && (
-        <div className="alt-cubuk">
+        <Sabit><div className="alt-cubuk">
           {hazir ? (
             <>
-              <button className="dugme sade" onClick={() => setHazir(null)}>Vazgeç</button>
-              <button className="dugme" onClick={() => paylas(hazir.dosyalar).then(() => setHazir(null)).catch((e) => setIsHata(e.message))}>
+              <button key="vazgec" className="dugme sade belir" onClick={() => setHazir(null)}>Vazgeç</button>
+              <button key="gonder" className="dugme belir" onClick={() => paylas(hazir.dosyalar).then(() => setHazir(null)).catch((e) => setIsHata(e.message))}>
                 Gönder
               </button>
             </>
           ) : (
             <>
-              <button className="dugme ikincil" disabled={!secili.length || !!is} onClick={() => hazirla('paylas')}>Paylaş</button>
+              <button key="paylas" className="dugme ikincil" disabled={!secili.length || !!is} onClick={() => hazirla('paylas')}>Paylaş</button>
               <button className="dugme" disabled={!secili.length || !!is} onClick={() => hazirla('birlestir')}>Birleştir</button>
             </>
           )}
-        </div>
+        </div></Sabit>
       )}
 
-      <button className="fab" onClick={() => sec.current?.click()} aria-label="Ekle"><IArti /></button>
+      <Sabit><button className="fab" onClick={() => sec.current?.click()} aria-label="Ekle"><IArti /></button></Sabit>
 
       {yeni && <YeniFatura dosyalar={yeni} ay={ay} kapat={() => setYeni(null)} />}
       {duzenle && <FaturaDuzenle f={duzenle} kapat={() => setDuzenle(null)} />}
@@ -145,6 +150,7 @@ export default function Faturalar() {
 }
 
 function YeniFatura({ dosyalar, ay, kapat }: { dosyalar: File[]; ay: string; kapat: () => void }) {
+  const { cikiyor, kapan } = useKapanis(kapat)
   const [tarih, setTarih] = useState(ayAnahtar(bugun()) === ay ? bugun() : `${ay}-01`)
   const [adlar, setAdlar] = useState(dosyalar.map((f) => (/^(image|img|photo|IMG_)/i.test(f.name) ? '' : f.name.replace(/\.[^.]+$/, ''))))
   const [tutarlar, setTutarlar] = useState(dosyalar.map(() => ''))
@@ -159,7 +165,7 @@ function YeniFatura({ dosyalar, ay, kapat }: { dosyalar: File[]; ay: string; kap
         const dosya = await dosyaKaydet(dosyalar[i])
         await addDoc(kFatura, { ad: adlar[i].trim() || 'Fatura', tarih, tutar: sayiOku(tutarlar[i]), dosya, at: Date.now() })
       }
-      kapat()
+      kapan()
     } catch (e) {
       setHata((e as Error).message)
       setIs(null)
@@ -167,7 +173,7 @@ function YeniFatura({ dosyalar, ay, kapat }: { dosyalar: File[]; ay: string; kap
   }
 
   return (
-    <Pencere baslik={dosyalar.length > 1 ? `${dosyalar.length} fatura` : 'Fatura'} kapat={is ? () => {} : kapat}>
+    <Pencere baslik={dosyalar.length > 1 ? `${dosyalar.length} fatura` : 'Fatura'} kapat={is ? () => {} : kapan} cikiyor={cikiyor}>
       <Alan etiket="Tarih"><input type="date" value={tarih} onChange={(e) => setTarih(e.target.value)} /></Alan>
       {dosyalar.map((f, i) => (
         <div className="kalem" key={i}>
@@ -186,6 +192,7 @@ function YeniFatura({ dosyalar, ay, kapat }: { dosyalar: File[]; ay: string; kap
 }
 
 function FaturaDuzenle({ f, kapat }: { f: Fatura; kapat: () => void }) {
+  const { cikiyor, kapan } = useKapanis(kapat)
   const [ad, setAd] = useState(f.ad)
   const [tarih, setTarih] = useState(f.tarih)
   const [tutar, setTutar] = useState(sayiYaz(f.tutar))
@@ -194,18 +201,18 @@ function FaturaDuzenle({ f, kapat }: { f: Fatura; kapat: () => void }) {
 
   async function kaydet() {
     await updateDoc(doc(kFatura, f.id), { ad: ad.trim() || 'Fatura', tarih, tutar: sayiOku(tutar) })
-    kapat()
+    kapan()
   }
   async function sil() {
     const b = writeBatch(db)
     dosyaSilBatch(b, f.dosya)
     await b.commit()
     await deleteDoc(doc(kFatura, f.id))
-    kapat()
+    kapan()
   }
 
   return (
-    <Pencere baslik="Fatura" kapat={kapat}>
+    <Pencere baslik="Fatura" kapat={kapan} cikiyor={cikiyor}>
       <Alan etiket="Ad"><input value={ad} onChange={(e) => setAd(e.target.value)} /></Alan>
       <Alan etiket="Tarih"><input type="date" value={tarih} onChange={(e) => setTarih(e.target.value)} /></Alan>
       <Alan etiket="Tutar"><input inputMode="decimal" value={tutar} onChange={(e) => setTutar(e.target.value)} /></Alan>

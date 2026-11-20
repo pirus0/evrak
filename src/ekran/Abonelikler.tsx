@@ -6,7 +6,8 @@ import { aylikKarsilik, sonrakiYenileme } from '../lib/hesap'
 import { sayiOku, sayiYaz, tl } from '../lib/para'
 import { bugun, gunFarki, kisa } from '../lib/tarih'
 import { useAbonelikler } from '../lib/veri'
-import { Alan, Bos, Pencere } from '../ortak'
+import { Alan, Bos, Pencere, Sabit } from '../ortak'
+import { useKapanis } from '../lib/hareket'
 import type { Abonelik } from '../tipler'
 
 export default function Abonelikler() {
@@ -54,13 +55,14 @@ export default function Abonelikler() {
           </>
         )}
       </div>
-      <button className="fab" onClick={() => setForm('yeni')} aria-label="Ekle"><IArti /></button>
+      <Sabit><button className="fab" onClick={() => setForm('yeni')} aria-label="Ekle"><IArti /></button></Sabit>
       {form && <AbonelikForm a={form === 'yeni' ? null : form} kapat={() => setForm(null)} />}
     </section>
   )
 }
 
 function AbonelikForm({ a, kapat }: { a: Abonelik | null; kapat: () => void }) {
+  const { cikiyor, kapan } = useKapanis(kapat)
   const [ad, setAd] = useState(a?.ad ?? '')
   const [tutar, setTutar] = useState(sayiYaz(a?.tutar ?? null))
   const [donem, setDonem] = useState<Abonelik['donem']>(a?.donem ?? 'aylik')
@@ -73,15 +75,15 @@ function AbonelikForm({ a, kapat }: { a: Abonelik | null; kapat: () => void }) {
     const veri = { ad: ad.trim(), tutar: t!, donem, baslangic }
     if (a) await updateDoc(doc(kAbonelik, a.id), veri)
     else await addDoc(kAbonelik, { ...veri, at: Date.now() })
-    kapat()
+    kapan()
   }
   async function sil() {
     if (a) await deleteDoc(doc(kAbonelik, a.id))
-    kapat()
+    kapan()
   }
 
   return (
-    <Pencere baslik="Abonelik" kapat={kapat}>
+    <Pencere baslik="Abonelik" kapat={kapan} cikiyor={cikiyor}>
       <Alan etiket="Ad"><input value={ad} onChange={(e) => setAd(e.target.value)} autoFocus={!a} /></Alan>
       <Alan etiket="Tutar"><input inputMode="decimal" value={tutar} onChange={(e) => setTutar(e.target.value)} /></Alan>
       <div className="alan">

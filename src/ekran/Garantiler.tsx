@@ -6,7 +6,8 @@ import { dosyaKaydet, dosyaSilBatch, pdfMi } from '../lib/dosya'
 import { garantiBitis } from '../lib/hesap'
 import { bugun, gunFarki, uzun } from '../lib/tarih'
 import { useGarantiler } from '../lib/veri'
-import { Alan, Bos, Goruntule, Pencere } from '../ortak'
+import { Alan, Bos, Goruntule, Pencere, Sabit } from '../ortak'
+import { useKapanis } from '../lib/hareket'
 import type { Garanti } from '../tipler'
 
 function kalan(bitis: string) {
@@ -58,16 +59,17 @@ export default function Garantiler() {
       {biten.length > 0 && (
         <div className="kart">
           <button className="bolum-dugme" onClick={() => setEski(!eski)}>Bitenler {biten.length}</button>
-          {eski && <ul className="liste soluk-liste">{[...biten].reverse().map(satir)}</ul>}
+          {eski && <ul className="liste soluk-liste belir">{[...biten].reverse().map(satir)}</ul>}
         </div>
       )}
-      <button className="fab" onClick={() => setForm('yeni')} aria-label="Ekle"><IArti /></button>
+      <Sabit><button className="fab" onClick={() => setForm('yeni')} aria-label="Ekle"><IArti /></button></Sabit>
       {form && <GarantiForm g={form === 'yeni' ? null : form} kapat={() => setForm(null)} />}
     </section>
   )
 }
 
 function GarantiForm({ g, kapat }: { g: Garanti | null; kapat: () => void }) {
+  const { cikiyor, kapan } = useKapanis(kapat)
   const [ad, setAd] = useState(g?.ad ?? '')
   const [alis, setAlis] = useState(g?.alis ?? bugun())
   const [sure, setSure] = useState(String(g?.sure ?? 2))
@@ -95,7 +97,7 @@ function GarantiForm({ g, kapat }: { g: Garanti | null; kapat: () => void }) {
       if (g) await updateDoc(doc(kGaranti, g.id), veri)
       else await addDoc(kGaranti, { ...veri, at: Date.now() })
       await b.commit()
-      kapat()
+      kapan()
     } catch (e) {
       setHata((e as Error).message)
       setIs(false)
@@ -107,11 +109,11 @@ function GarantiForm({ g, kapat }: { g: Garanti | null; kapat: () => void }) {
     if (g.dosya) dosyaSilBatch(b, g.dosya)
     await b.commit()
     await deleteDoc(doc(kGaranti, g.id))
-    kapat()
+    kapan()
   }
 
   return (
-    <Pencere baslik="Garanti" kapat={is ? () => {} : kapat}>
+    <Pencere baslik="Garanti" kapat={is ? () => {} : kapan} cikiyor={cikiyor}>
       <Alan etiket="Ürün"><input value={ad} onChange={(e) => setAd(e.target.value)} autoFocus={!g} /></Alan>
       <Alan etiket="Alış"><input type="date" value={alis} onChange={(e) => setAlis(e.target.value)} /></Alan>
       <div className="alan">
